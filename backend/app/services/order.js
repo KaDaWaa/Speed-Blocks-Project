@@ -74,12 +74,6 @@ module.exports = {
           },
       },
       {
-        $limit:
-          /**
-           * The number of documents to pass to the next*/
-          3,
-      },
-      {
         $lookup:
           /**
            * from: The target collection.
@@ -109,6 +103,25 @@ module.exports = {
             includeArrayIndex: "string",
             preserveNullAndEmptyArrays: false,
           },
+      },
+      {
+        $replaceRoot: {
+          newRoot: {
+            $mergeObjects: [
+              "$product",
+              {
+                total: "$total",
+              },
+            ],
+          },
+        },
+      },
+      {
+        $limit:
+          /**
+           * Provide the number of documents to limit.
+           */
+          3,
       },
     ]);
   },

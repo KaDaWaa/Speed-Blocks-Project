@@ -7,7 +7,6 @@ import axios from "axios";
 export default function homePage() {
   const { user, cart } = useUserContext();
   const [top3products, setTop3products] = useState(null);
-  console.log(top3products);
   useEffect(() => {
     const getTop3Products = async () => {
       try {
@@ -25,6 +24,7 @@ export default function homePage() {
     };
     getTop3Products();
   }, []);
+
   return (
     <div
       style={{
@@ -50,6 +50,7 @@ export default function homePage() {
         {top3products &&
           top3products.map((product) => (
             <div
+              key={product._id}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -59,7 +60,7 @@ export default function homePage() {
               <ProductCard
                 style={{ margin: "15px" }}
                 key={product._id}
-                product={product.product}
+                product={product}
                 setProducts={setTop3products}
               />
               <h5 style={{ margin: "10px" }}>Quantity Sold: {product.total}</h5>

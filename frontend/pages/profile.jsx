@@ -21,7 +21,7 @@ import {
 } from "@mui/material";
 
 export default function Profile() {
-  const { user } = useUserContext();
+  const { user, setUser } = useUserContext();
   const router = useRouter();
   const [orders, setOrders] = useState([]);
   const [open, setOpen] = useState(false);
@@ -61,6 +61,8 @@ export default function Profile() {
 
   const handleNameChange = async () => {
     try {
+      if (formData.name === user.name) return;
+
       const response = await axios.put(
         `http://localhost:3001/api/users/updateName/`,
         {
@@ -71,7 +73,7 @@ export default function Profile() {
       console.log(response);
       if (!response)
         return console.log("something went wrong while updating name");
-
+      setUser({ ...user, name: formData.name });
       setSeverity("success");
       setTitle("Success");
       setMessage("Name updated successfully");
