@@ -65,7 +65,6 @@ module.exports = {
   getById: async (req, res) => {
     try {
       const id = req.params.id;
-      console.log(id);
       if (!id) {
         return res.status(400).json("missing required fields");
       }
