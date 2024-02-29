@@ -22,7 +22,6 @@ import {
   TableCell,
   TableBody,
   AlertTitle,
-  stickyHeader,
 } from "@mui/material";
 
 export default function Profile() {
