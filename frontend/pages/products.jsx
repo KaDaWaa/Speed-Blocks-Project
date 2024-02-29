@@ -32,7 +32,6 @@ export default function ProductsPage() {
         const response = await axios.get(
           `http://localhost:3001/api/products/getProductsByPageAndSort/${page}/${sort}`
         );
-        console.log(response);
         if (!response)
           return console.log("something went wrong while getting products");
         setProducts(response.data);
@@ -57,7 +56,6 @@ export default function ProductsPage() {
         const response = await axios.get(
           "http://localhost:3001/api/products/getTotalProducts"
         );
-        console.log(response);
         if (!response)
           return console.log(
             "something went wrong while getting total products"
@@ -112,6 +110,7 @@ export default function ProductsPage() {
               <MenuItem value="oldest">Oldest</MenuItem>
               <MenuItem value="price-asc">Price Ascending</MenuItem>
               <MenuItem value="price-desc">Price Descending</MenuItem>
+              <MenuItem value="default">Default</MenuItem>
             </Select>
           </FormControl>
         </div>
@@ -132,6 +131,7 @@ export default function ProductsPage() {
       ) : (
         <div
           style={{
+            key: "products",
             marginTop: "5vh",
             display: "flex",
             flexWrap: "wrap",

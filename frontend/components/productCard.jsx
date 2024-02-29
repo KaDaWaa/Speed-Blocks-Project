@@ -132,7 +132,6 @@ export default function ProductCard({ product, setProducts }) {
           ]);
         }
       }
-      console.log(response);
     } catch (err) {
       console.log(err);
     }

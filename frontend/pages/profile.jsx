@@ -22,6 +22,7 @@ import {
   TableCell,
   TableBody,
   AlertTitle,
+  stickyHeader,
 } from "@mui/material";
 
 export default function Profile() {
@@ -169,7 +170,6 @@ export default function Profile() {
             user._id
           }/${startD.valueOf()}/${endD.valueOf()}`
         );
-        console.log(response);
         if (!response)
           return console.log("something went wrong while getting orders");
         setOrders(response.data);
@@ -195,7 +195,6 @@ export default function Profile() {
         const response = await axios.get(
           `http://localhost:3001/api/users/getTopBuyer`
         );
-        console.log(response);
         if (!response)
           return console.log("something went wrong while getting top buyer");
         setTopBuyer(response.data);

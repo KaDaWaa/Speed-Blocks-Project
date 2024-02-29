@@ -19,7 +19,10 @@ export default function product() {
   };
   const handleAddToCart = async () => {
     try {
-      if (!user) router.push("/signuplogin");
+      if (!user) {
+        router.push("/signuplogin");
+        return;
+      }
       const response = await axios.post(
         `http://localhost:3001/api/users/addToCart/${product._id}`,
         { userId: user._id, qty: quantity }
@@ -41,7 +44,6 @@ export default function product() {
           ]);
         }
       }
-      console.log(response);
     } catch (err) {
       console.log(err);
     }
@@ -52,7 +54,6 @@ export default function product() {
         const response = await axios.get(
           `http://localhost:3001/api/products/getById/${prodId}`
         );
-        console.log(response);
         if (!response)
           return console.log("something went wrong while getting product");
         setProduct(response.data);
