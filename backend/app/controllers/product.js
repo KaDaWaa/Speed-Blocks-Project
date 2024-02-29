@@ -6,7 +6,10 @@ const {
   updateProductQuantity,
   getProductsByPage,
   amountOfProducts,
+  getProductsByPageAndSort,
+  bestSellingByPage,
 } = require("../services/product");
+
 const { top3BestSelling } = require("../services/order");
 
 module.exports = {
@@ -23,11 +26,34 @@ module.exports = {
       res.status(500).json(err);
     }
   },
-  getAllByPage: async (req, res) => {
+  getAllByPageAndSort: async (req, res) => {
     try {
       const pageN = req.params.pageN;
-      const products = await getProductsByPage(pageN);
-      if (!products) {
+      const sortBy = req.params.sortBy;
+      let queryOptions = {};
+
+      if (sortBy === "newest") {
+        queryOptions = { createdAt: -1 };
+      } else if (sortBy === "oldest") {
+        queryOptions = { createdAt: 1 };
+      } else if (sortBy === "price-asc") {
+        queryOptions = { price: 1 };
+      } else if (sortBy === "price-desc") {
+        queryOptions = { price: -1 };
+      }
+
+      let products;
+      if (sortBy === "default" || !sortBy) {
+        products = await getProductsByPage(pageN);
+      } else {
+        if (sortBy === "best-selling") {
+          products = await bestSellingByPage(pageN);
+        } else {
+          products = await getProductsByPageAndSort(pageN, queryOptions);
+        }
+      }
+
+      if (!products || products.length === 0) {
         return res.status(404).json("No products found");
       }
       res.json(products);
@@ -35,6 +61,7 @@ module.exports = {
       res.status(500).json(err);
     }
   },
+
   getById: async (req, res) => {
     try {
       const id = req.params.id;

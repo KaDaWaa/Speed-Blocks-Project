@@ -8,6 +8,10 @@ import ProductCard from "../components/productCard";
 import FormGroup from "../components/FormGroup";
 import AddProduct from "../components/addProduct";
 import MyPagination from "../components/myPagination";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import Select from "@mui/material/Select";
 export default function ProductsPage() {
   const router = useRouter();
   const { user } = useUserContext();
@@ -17,12 +21,16 @@ export default function ProductsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalProducts, setTotalProducts] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [sort, setSort] = useState("default");
 
+  const handleChange = (event) => {
+    setSort(event.target.value);
+  };
   useEffect(() => {
     const getProducts = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3001/api/products/getProductsByPage/${page}`
+          `http://localhost:3001/api/products/getProductsByPageAndSort/${page}/${sort}`
         );
         console.log(response);
         if (!response)
@@ -37,7 +45,7 @@ export default function ProductsPage() {
     setTimeout(() => {
       setIsLoading(false);
     }, 800);
-  }, [page]);
+  }, [page, sort]);
 
   useEffect(() => {
     setTotalPages(Math.ceil(totalProducts / 6));
@@ -76,11 +84,37 @@ export default function ProductsPage() {
       <div
         style={{
           display: "flex",
-          justifyContent: "flex-end",
+          flexDirection: "row",
+          justifyContent: "space-between",
           width: "80%",
-          //border: "5px solid black",
         }}
       >
+        <div
+          style={{
+            display: "flex",
+
+            flexDirection: "row",
+          }}
+        >
+          <FormControl sx={{ m: 1, minWidth: 120 }}>
+            <InputLabel id="demo-simple-select-helper-label">
+              Sort By
+            </InputLabel>
+            <Select
+              labelId="demo-simple-select-helper-label"
+              id="demo-simple-select-helper"
+              value={sort}
+              label="Select"
+              onChange={handleChange}
+            >
+              <MenuItem value="best-selling">Best Selling</MenuItem>
+              <MenuItem value="newest">Newest</MenuItem>
+              <MenuItem value="oldest">Oldest</MenuItem>
+              <MenuItem value="price-asc">Price Ascending</MenuItem>
+              <MenuItem value="price-desc">Price Descending</MenuItem>
+            </Select>
+          </FormControl>
+        </div>
         <AddProduct
           products={products}
           setProducts={setProducts}

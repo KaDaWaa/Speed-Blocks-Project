@@ -1,4 +1,5 @@
 const Order = require("../models/order");
+const Product = require("../models/product");
 const { getPrice } = require("./product");
 
 module.exports = {
