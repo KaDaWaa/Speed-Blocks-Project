@@ -9,6 +9,10 @@ import FormGroup from "../components/FormGroup";
 import Box from "@mui/material/Box";
 import Alert from "@mui/material/Alert";
 import Collapse from "@mui/material/Collapse";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import dayjs from "dayjs";
 
 import {
   Paper,
@@ -24,6 +28,7 @@ export default function Profile() {
   const { user, setUser } = useUserContext();
   const router = useRouter();
   const [orders, setOrders] = useState([]);
+  const [totalPrice, setTotalPrice] = useState(0);
   const [open, setOpen] = useState(false);
   const [openEditMessage, setOpenEditMessage] = useState(false);
   const [message, setMessage] = useState("");
@@ -31,6 +36,8 @@ export default function Profile() {
   const [severity, setSeverity] = useState("success");
   const [title, setTitle] = useState("success");
   const [topBuyer, setTopBuyer] = useState({});
+  const [startD, setStartD] = useState(dayjs("2024-02-01"));
+  const [endD, setEndD] = useState(dayjs(Date.now()));
   const [formData, setFormData] = useState({
     name: "",
     password: "",
@@ -39,8 +46,6 @@ export default function Profile() {
   });
   const [showEditModal, setShowEditModal] = useState(false);
   const [isTopBuyer, setIsTopBuyer] = useState(false);
-  console.log(formData);
-  console.log(isTopBuyer);
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -70,7 +75,6 @@ export default function Profile() {
           name: formData.name,
         }
       );
-      console.log(response);
       if (!response)
         return console.log("something went wrong while updating name");
       setUser({ ...user, name: formData.name });
@@ -115,7 +119,6 @@ export default function Profile() {
           newPw: formData.newPassword,
         }
       );
-      console.log(response);
       if (!response) {
         setShowEditModal(false);
         setSeverity("error");
@@ -149,30 +152,27 @@ export default function Profile() {
       console.log(err);
     }
   };
-
+  useEffect(() => {
+    let total = 0;
+    if (orders) {
+      orders.map((o) => {
+        total += o.totalPrice;
+      });
+    }
+    setTotalPrice(total);
+  }, [orders]);
   useEffect(() => {
     const getOrders = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3001/api/users/getOrdersById/${user._id}`
+          `http://localhost:3001/api/users/getOrdersByIdAndDates/${
+            user._id
+          }/${startD.valueOf()}/${endD.valueOf()}`
         );
         console.log(response);
         if (!response)
           return console.log("something went wrong while getting orders");
         setOrders(response.data);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    const getTopBuyer = async () => {
-      try {
-        const response = await axios.get(
-          `http://localhost:3001/api/users/getTopBuyer`
-        );
-        console.log(response);
-        if (!response)
-          return console.log("something went wrong while getting top buyer");
-        setTopBuyer(response.data);
       } catch (err) {
         console.log(err);
       }
@@ -187,9 +187,25 @@ export default function Profile() {
         newPassword: "",
       });
       getOrders();
-      getTopBuyer();
     }
-  }, [user]);
+  }, [user, startD, endD]);
+  useEffect(() => {
+    const getTopBuyer = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:3001/api/users/getTopBuyer`
+        );
+        console.log(response);
+        if (!response)
+          return console.log("something went wrong while getting top buyer");
+        setTopBuyer(response.data);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    getTopBuyer();
+  }, []);
   useEffect(() => {
     if (topBuyer[0] && topBuyer[0]._id === user._id) {
       setIsTopBuyer(true);
@@ -201,15 +217,7 @@ export default function Profile() {
       <h1 style={{ alignSelf: "center" }} className="text-primary">
         Profile
       </h1>
-      {isTopBuyer && (
-        <Alert
-          severity="info"
-          style={{ width: "20%", alignSelf: "center", margin: "10px" }}
-        >
-          <AlertTitle>Congratulations</AlertTitle>You are our top buyer , With a
-          total purchases of {topBuyer[0].totalPurchases}$
-        </Alert>
-      )}
+
       <Collapse in={open} style={{ width: "40%", alignSelf: "center" }}>
         <Alert severity={severity}>
           <AlertTitle>{title}</AlertTitle>
@@ -228,7 +236,13 @@ export default function Profile() {
           role="personalInfo"
         >
           <h3>Personal Info</h3>
-          <div style={{ width: "60%" }}>
+          <div
+            style={{
+              display: "flex",
+              width: "60%",
+              flexDirection: "column",
+            }}
+          >
             <FormGroup
               label={"Name"}
               type={"text"}
@@ -339,10 +353,45 @@ export default function Profile() {
                 </Modal.Footer>
               </Modal>
             </div>
+            {isTopBuyer && (
+              <Alert
+                severity="info"
+                style={{ alignSelf: "center", margin: "10px" }}
+              >
+                <AlertTitle>Congratulations</AlertTitle>You are our top buyer ,
+                With a total purchases of {topBuyer[0].totalPurchases}$
+              </Alert>
+            )}
           </div>
         </div>
+
         <div style={{ width: "60%", margin: "50px" }}>
           <h3>My Orders</h3>
+          <div
+            style={{
+              display: "flex",
+              margin: "15px",
+              marginLeft: "0px",
+              width: "80%",
+              justifyContent: "space-between",
+            }}
+          >
+            <DatePicker
+              label="Start"
+              defaultValue={startD}
+              onChange={(value) => {
+                setStartD(value);
+              }}
+            />
+            <DatePicker
+              label="End"
+              defaultValue={endD}
+              onChange={(value) => {
+                setEndD(value);
+              }}
+            />
+          </div>
+
           <Paper sx={{ width: "100%", overflow: "hidden" }}>
             <TableContainer sx={{ maxHeight: 200 }}>
               <Table stickyHeader aria-label="sticky table">
@@ -372,6 +421,9 @@ export default function Profile() {
               </Table>
             </TableContainer>
           </Paper>
+          <h5 style={{ margin: "10px", marginLeft: "0px" }}>
+            Total Purchases : {totalPrice.toFixed(2)}
+          </h5>
         </div>
       </div>
     </div>

@@ -12,7 +12,11 @@ router.delete(
 );
 router.put("/updateCart", cacheNoStore, controller.updateCart);
 router.put("/addOrder/:orderId", cacheNoStore, controller.addOrder);
-router.get("/getOrdersById/:userId", cacheNoStore, controller.getOrdersById);
+router.get(
+  "/getOrdersByIdAndDates/:userId/:start/:end",
+  cacheNoStore,
+  controller.getOrdersByIdAndDates
+);
 router.put("/updateName", cacheNoStore, controller.updateName);
 router.put("/updatePassword", cacheNoStore, controller.updateUserPw);
 router.get("/getTopBuyer", cacheNoStore, controller.TopBuyer);

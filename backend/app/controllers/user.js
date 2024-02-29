@@ -6,7 +6,7 @@ const {
   addToCart,
   removeFromCart,
   updateCart,
-  getOrdersById,
+  getOrdersByIdAndDates,
   updateName,
   getTopBuyer,
 } = require("../services/user");
@@ -73,10 +73,12 @@ module.exports = {
       res.status(500).json(err);
     }
   },
-  getOrdersById: async (req, res) => {
+  getOrdersByIdAndDates: async (req, res) => {
     try {
       const userId = req.params.userId;
-      const orders = await getOrdersById(userId);
+      const start = req.params.start;
+      const end = req.params.end;
+      const orders = await getOrdersByIdAndDates(userId, start, end);
       res.json(orders);
     } catch (err) {
       res.status(500).json(err);

@@ -10,11 +10,6 @@ module.exports = {
     });
     return newOrder.save();
   },
-  getOrdersByPage: async (pageN) => {
-    return Order.find()
-      .skip((pageN - 1) * 9)
-      .limit(9);
-  },
   getOrderById: async (id) => {
     return Order.findById(id);
   },

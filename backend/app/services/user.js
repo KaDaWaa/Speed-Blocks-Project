@@ -1,6 +1,7 @@
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
 const { getOrderById } = require("./order");
+const { ObjectId } = require("mongodb");
 const { enoughToSupply } = require("./product");
 
 module.exports = {
@@ -95,17 +96,107 @@ module.exports = {
     }
     return "User not found";
   },
-  getOrdersById: async (userId) => {
-    const user = await User.findById(userId);
-    if (user) {
-      const OrdersArr = [];
-      for (const orderId of user.orders) {
-        const order = await getOrderById(orderId);
-        OrdersArr.push(order);
+  getOrdersByIdAndDates: async (userId, start, end) => {
+    try {
+      const userOrders = await User.aggregate([
+        {
+          $unwind:
+            /**
+             * path: Path to the array field.
+             * includeArrayIndex: Optional name for index.
+             * preserveNullAndEmptyArrays: Optional
+             *   toggle to unwind null and empty values.
+             */
+            {
+              path: "$orders",
+              includeArrayIndex: "string",
+              preserveNullAndEmptyArrays: false,
+            },
+        },
+        {
+          $lookup:
+            /**
+             * from: The target collection.
+             * localField: The local join field.
+             * foreignField: The target join field.
+             * as: The name for the results.
+             * pipeline: Optional pipeline to run on the foreign collection.
+             * let: Optional variables to use in the pipeline field stages.
+             */
+            {
+              from: "orders",
+              localField: "orders",
+              foreignField: "_id",
+              as: "order",
+            },
+        },
+        {
+          $unwind:
+            /**
+             * path: Path to the array field.
+             * includeArrayIndex: Optional name for index.
+             * preserveNullAndEmptyArrays: Optional
+             *   toggle to unwind null and empty values.
+             */
+            {
+              path: "$order",
+              includeArrayIndex: "string",
+              preserveNullAndEmptyArrays: false,
+            },
+        },
+        {
+          $sort:
+            /**
+             * Provide any number of field/order pairs.
+             */
+            {
+              "order.createdAt": -1,
+            },
+        },
+        {
+          $match:
+            /**
+             * query: The query in MQL.
+             */
+            {
+              "order.createdAt": {
+                $gte: new Date(Number(start)),
+                $lte: new Date(Number(end)),
+              },
+            },
+        },
+        {
+          $group:
+            /**
+             * _id: The id of the group.
+             * fieldN: The first field name.
+             */
+            {
+              _id: "$_id",
+              orders: {
+                $push: "$order",
+              },
+            },
+        },
+        {
+          $match:
+            /**
+             * query: The query in MQL.
+             */
+            {
+              _id: new ObjectId(userId),
+            },
+        },
+      ]);
+      if (userOrders.length > 0) {
+        return userOrders[0].orders;
+      } else {
+        return [];
       }
-      return OrdersArr;
+    } catch (error) {
+      console.error("Error:", error);
+      return "An error occurred while fetching orders.";
     }
-    return "User not found";
   },
   updateCart: async (userId, cart) => {
     const user = await User.findById(userId);

@@ -34,18 +34,6 @@ module.exports = {
       res.status(500).json(err);
     }
   },
-  getAllByPage: async (req, res) => {
-    try {
-      const pageN = req.params.pageN;
-      const orders = await getOrdersByPage(pageN);
-      if (!orders) {
-        return res.status(404).json("No orders found");
-      }
-      res.json(orders);
-    } catch (err) {
-      res.status(500).json(err);
-    }
-  },
   getById: async (req, res) => {
     try {
       const id = req.params.id;
